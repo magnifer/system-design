@@ -111,6 +111,13 @@ private:
 class Board
 {
 public:
+    ~Board()
+    {
+        for (auto rule : vBoardRules)
+        {
+            delete rule;
+        }
+    }
     void AddRule(IBoardRule *rule)
     {
         vBoardRules.push_back(rule);
@@ -141,6 +148,10 @@ public:
 
         m_Board.AddRule(new SnakeRule({{99, 10}, {92, 55}, {77, 32}, {44, 25}, {24, 3}}));
         m_Board.AddRule(new LadderRule({{3, 24}, {21, 43}, {47, 87}, {75, 95}}));
+    }
+    ~Game()
+    {
+        delete (m_pDice);
     }
 
     void PlayGame()
@@ -192,8 +203,6 @@ int main()
     IDice *dice = new StandardDice();
     Game game(dice);
     game.PlayGame();
-
-    delete dice;
 
     return 0;
 }
