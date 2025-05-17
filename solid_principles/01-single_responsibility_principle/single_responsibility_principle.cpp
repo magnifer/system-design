@@ -19,10 +19,17 @@ class Player
 {
 public:
     Player(std::string szName) : nPosition(0), szPlayerName(szName) {}
-    Player(Player &player) = delete;
-    Player(Player &&player)
+    Player(Player &player) noexcept
+        : nPosition(player.nPosition),
+          szPlayerName(player.szPlayerName)
     {
-        std::cout << "Move constructor invoked";
+        std::cout << "Copy Constructor invoked\n";
+    }
+    Player(Player &&player) noexcept
+        : nPosition(player.nPosition),
+          szPlayerName(std::move(player.szPlayerName))
+    {
+        std::cout << "Move constructor invoked\n";
     };
 
     int GetPosition() const { return nPosition; };
