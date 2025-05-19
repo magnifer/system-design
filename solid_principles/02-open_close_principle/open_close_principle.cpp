@@ -111,20 +111,13 @@ private:
 class Board
 {
 public:
-    ~Board()
+    void AddRule(std::unique_ptr<IBoardRule> rule)
     {
-        for (auto rule : vBoardRules)
-        {
-            delete rule;
-        }
-    }
-    void AddRule(IBoardRule *rule)
-    {
-        vBoardRules.push_back(rule);
+        vBoardRules.push_back(std::move(rule));
     }
     int GetNewPosition(int nPosition)
     {
-        for (auto rule : vBoardRules)
+        for (const auto &rule : vBoardRules)
         {
             if (rule->AppliesTo(nPosition))
             {
@@ -135,24 +128,21 @@ public:
     }
 
 private:
-    std::vector<IBoardRule *> vBoardRules;
+    std::vector<std::unique_ptr<IBoardRule>> vBoardRules;
 };
 
 class Game
 {
 public:
-    Game(IDice *dice) : m_pDice(dice)
+    Game(std::unique_ptr<IDice> dice) : m_pDice(std::move(dice))
     {
         m_vPlayers.emplace_back("Player_1");
         m_vPlayers.emplace_back("Player_2");
 
-        m_Board.AddRule(new SnakeRule({{99, 10}, {92, 55}, {77, 32}, {44, 25}, {24, 3}}));
-        m_Board.AddRule(new LadderRule({{3, 24}, {21, 43}, {47, 87}, {75, 95}}));
+        m_Board.AddRule(std::make_unique<SnakeRule>(std::map<int, int>{{99, 10}, {92, 55}, {77, 32}, {44, 25}, {24, 3}}));
+        m_Board.AddRule(std::make_unique<LadderRule>(std::map<int, int>{{3, 24}, {21, 43}, {47, 87}, {75, 95}}));
     }
-    ~Game()
-    {
-        delete (m_pDice);
-    }
+    virtual ~Game() {}
 
     void PlayGame()
     {
@@ -191,7 +181,7 @@ public:
     }
 
 private:
-    IDice *m_pDice;
+    std::unique_ptr<IDice> m_pDice;
     Board m_Board;
     std::vector<Player> m_vPlayers;
     int nCurrentPlayerIndex = 0;
@@ -200,8 +190,8 @@ private:
 
 int main()
 {
-    IDice *dice = new StandardDice();
-    Game game(dice);
+    auto dice = std::make_unique<StandardDice>();
+    Game game(std::move(dice));
     game.PlayGame();
 
     return 0;
